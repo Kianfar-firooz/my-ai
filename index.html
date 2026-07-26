@@ -181,7 +181,7 @@
 <script>
     const FAMILY_PASSWORD = "123"; 
 
-    // آدرس پل کلادفلر خود را دقیقاً به جای لینک زیر قرار دهید:
+    // آدرس دقیق پل کلادفلر شما
     const WORKER_URL = "https://snowy-sunset-fdf9.firooz-kianfar.workers.dev/";
 
     window.onload = function() {
@@ -269,12 +269,12 @@
             if (data.candidates && data.candidates[0].content.parts[0].text) {
                 aiDiv.innerText = data.candidates[0].content.parts[0].text;
             } else if (data.error) {
-                aiDiv.innerText = "خطا از سمت گوگل: " + data.error.message;
+                aiDiv.innerText = "خطا از سمت گوگل: " + (data.error.message || JSON.stringify(data.error));
             } else {
-                aiDiv.innerText = "پاسخی دریافت نشد یا کلید API نامعتبر است.";
+                aiDiv.innerText = "پاسخ نامعتبر: " + JSON.stringify(data);
             }
         } catch (error) {
-            aiDiv.innerText = "خطا در ارتباط با پل کلادفلر.";
+            aiDiv.innerText = "خطا در ارتباط با پل کلادفلر: " + error.message;
             console.error(error);
         }
 
