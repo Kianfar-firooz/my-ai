@@ -1,90 +1,292 @@
-<!-- بخش چت با جمنای -->
-<div id="chat-screen">
-    <div class="chat-header">چت با جمنای (محیط اختصاصی)</div>
-    <div class="chat-messages" id="messages-container">
-        <div class="message ai-message">سلام! من آماده‌ام، چه کمکی از دست من برمی‌آید؟</div>
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دستیار هوش مصنوعی شخصی</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --accent-color: #38bdf8;
+            --user-msg: #0284c7;
+            --ai-msg: #334155;
+        }
+        body {
+            font-family: Tahoma, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            height: 90vh;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid #334155;
+        }
+        /* استایل صفحه ورود */
+        #auth-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            padding: 20px;
+            text-align: center;
+        }
+        #auth-screen input {
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #475569;
+            background: #0f172a;
+            color: white;
+            margin-bottom: 12px;
+            width: 80%;
+            max-width: 320px;
+            text-align: center;
+            outline: none;
+        }
+        #auth-screen label {
+            font-size: 14px;
+            margin-bottom: 5px;
+            color: #94a3b8;
+        }
+        #auth-screen button {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 8px;
+            background: var(--accent-color);
+            color: #0f172a;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        /* استایل بخش چت */
+        #chat-screen {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+        }
+        .chat-header {
+            padding: 15px;
+            background: #0f172a;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #334155;
+        }
+        .logout-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .chat-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .message {
+            padding: 10px 14px;
+            border-radius: 10px;
+            max-width: 75%;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+        .user-message {
+            background: var(--user-msg);
+            align-self: flex-start;
+        }
+        .ai-message {
+            background: var(--ai-msg);
+            align-self: flex-end;
+        }
+        .chat-input-area {
+            display: flex;
+            padding: 12px;
+            background: #0f172a;
+            border-top: 1px solid #334155;
+        }
+        .chat-input-area input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #475569;
+            background: #1e293b;
+            color: white;
+            outline: none;
+        }
+        .chat-input-area button {
+            padding: 10px 18px;
+            margin-right: 8px;
+            border: none;
+            border-radius: 8px;
+            background: var(--accent-color);
+            color: #0f172a;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .error-text { color: #f87171; font-size: 14px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- بخش ورود خانوادگی و کلید API -->
+    <div id="auth-screen">
+        <h2>تنظیمات ورود به هوش مصنوعی</h2>
+        <p style="font-size: 13px; color: #94a3b8; margin-bottom: 20px;">اطلاعات زیر فقط یک‌بار وارد شده و در مرورگر شما ذخیره می‌شوند.</p>
+        
+        <label for="password-input">رمز عبور خانوادگی:</label>
+        <input type="password" id="password-input" placeholder="رمز عبور...">
+        
+        <label for="apikey-input">کلید API جمنای:</label>
+        <input type="password" id="apikey-input" placeholder="کلید API خود را وارد کنید...">
+        
+        <button onclick="saveAndLogin()">ورود و ذخیره</button>
+        <div id="error-msg" class="error-text"></div>
     </div>
-    <div class="chat-input-area">
-        <input type="text" id="user-input" placeholder="پیام خود را بنویسید..." onkeypress="handleKeyPress(event)">
-        <button onclick="sendMessage()">ارسال</button>
+
+    <!-- بخش چت با جمنای -->
+    <div id="chat-screen">
+        <div class="chat-header">
+            <span>چت با جمنای (محیط اختصاصی)</span>
+            <button class="logout-btn" onclick="logout()">خروج و پاک کردن تنظیمات</button>
+        </div>
+        <div class="chat-messages" id="messages-container">
+            <div class="message ai-message">سلام! من آماده‌ام، چه کمکی از دست من برمی‌آید؟</div>
+        </div>
+        <div class="chat-input-area">
+            <input type="text" id="user-input" placeholder="پیام خود را بنویسید..." onkeypress="handleKeyPress(event)">
+            <button onclick="sendMessage()">ارسال</button>
+        </div>
     </div>
-</div>
 </div>
 
 <script>
-// رمز عبور دلخواه برای خودتان و خانواده (می‌توانید تغییرش دهید)
-const FAMILY_PASSWORD = "Firooz1389kianfar"; 
+    // رمز عبور دلخواه برای خودتان و خانواده (می‌توانید همینجا تغییرش دهید)
+    const FAMILY_PASSWORD = "123"; 
 
-// کلید API جمنای خود را اینجا قرار دهید
-const GEMINI_API_KEY = "AQ.Ab8RN6KH_uzUrnuv9WwFb3SwmvChZIj-OydVavYP5Bo3Q5gXUQ";
+    // بررسی اینکه آیا از قبل اطلاعات در مرورگر ذخیره شده است یا خیر
+    window.onload = function() {
+        const savedAuth = localStorage.getItem("is_authenticated");
+        const savedKey = localStorage.getItem("gemini_api_key");
+        
+        if (savedAuth === "true" && savedKey) {
+            document.getElementById("auth-screen").style.display = "none";
+            document.getElementById("chat-screen").style.display = "flex";
+        }
+    };
 
-function checkPassword() {
-    const pass = document.getElementById("password-input").value;
-    if (pass === FAMILY_PASSWORD) {
+    function saveAndLogin() {
+        const pass = document.getElementById("password-input").value;
+        const apiKey = document.getElementById("apikey-input").value.trim();
+        const errorDiv = document.getElementById("error-msg");
+
+        if (pass !== FAMILY_PASSWORD) {
+            errorDiv.innerText = "رمز عبور خانوادگی اشتباه است!";
+            return;
+        }
+
+        if (!apiKey) {
+            errorDiv.innerText = "لطفاً کلید API را وارد کنید!";
+            return;
+        }
+
+        // ذخیره کردن در حافظه مرورگر (حساب کاربری/مرورگر شما)
+        localStorage.setItem("is_authenticated", "true");
+        localStorage.setItem("gemini_api_key", apiKey);
+
+        // رفتن به صفحه چت
         document.getElementById("auth-screen").style.display = "none";
         document.getElementById("chat-screen").style.display = "flex";
-    } else {
-        document.getElementById("error-msg").innerText = "رمز عبور اشتباه است!";
     }
-}
 
-function handleKeyPress(event) {
-    if (event.key === "Enter") {
-        sendMessage();
+    function logout() {
+        localStorage.removeItem("is_authenticated");
+        localStorage.removeItem("gemini_api_key");
+        location.reload();
     }
-}
 
-async function sendMessage() {
-    const inputField = document.getElementById("user-input");
-    const messageText = inputField.value.trim();
-    if (!messageText) return;
-
-    const container = document.getElementById("messages-container");
-
-    // نمایش پیام کاربر
-    const userDiv = document.createElement("div");
-    userDiv.className = "message user-message";
-    userDiv.innerText = messageText;
-    container.appendChild(userDiv);
-
-    inputField.value = "";
-    container.scrollTop = container.scrollHeight;
-
-    // نمایش پیام در حال پردازش
-    const aiDiv = document.createElement("div");
-    aiDiv.className = "message ai-message";
-    aiDiv.innerText = "در حال تفکر...";
-    container.appendChild(aiDiv);
-    container.scrollTop = container.scrollHeight;
-
-    try {
-        // اتصال به API رسمی جمنای (مدل gemini-1.5-flash)
-        const response = await fetch(https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                contents: [{
-                    parts: [{ text: messageText }]
-                }]
-            })
-        });
-
-        const data = await response.json();
-        
-        if (data.candidates && data.candidates[0].content.parts[0].text) {
-            aiDiv.innerText = data.candidates[0].content.parts[0].text;
-        } else {
-            aiDiv.innerText = "پاسخی دریافت نشد یا خطایی رخ داد.";
+    function handleKeyPress(event) {
+        if (event.key === "Enter") {
+            sendMessage();
         }
-    } catch (error) {
-        aiDiv.innerText = "خطا در ارتباط با سرور هوش مصنوعی.";
-        console.error(error);
     }
 
-    container.scrollTop = container.scrollHeight;
-}
+    async function sendMessage() {
+        const inputField = document.getElementById("user-input");
+        const messageText = inputField.value.trim();
+        if (!messageText) return;
+
+        const container = document.getElementById("messages-container");
+        const apiKey = localStorage.getItem("gemini_api_key");
+
+        // نمایش پیام کاربر
+        const userDiv = document.createElement("div");
+        userDiv.className = "message user-message";
+        userDiv.innerText = messageText;
+        container.appendChild(userDiv);
+
+        inputField.value = "";
+        container.scrollTop = container.scrollHeight;
+
+        // نمایش پیام در حال پردازش
+        const aiDiv = document.createElement("div");
+        aiDiv.className = "message ai-message";
+        aiDiv.innerText = "در حال تفکر...";
+        container.appendChild(aiDiv);
+        container.scrollTop = container.scrollHeight;
+
+        try {
+            // اتصال به API رسمی جمنای با کلید ذخیره شده
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    contents: [{
+                        parts: [{ text: messageText }]
+                    }]
+                })
+            });
+
+            const data = await response.json();
+            
+            if (data.candidates && data.candidates[0].content.parts[0].text) {
+                aiDiv.innerText = data.candidates[0].content.parts[0].text;
+            } else if (data.error) {
+                aiDiv.innerText = "خطا از سمت گوگل: " + data.error.message;
+            } else {
+                aiDiv.innerText = "پاسخی دریافت نشد یا کلید API نامعتبر است.";
+            }
+        } catch (error) {
+            aiDiv.innerText = "خطا در ارتباط با سرور هوش مصنوعی.";
+            console.error(error);
+        }
+
+        container.scrollTop = container.scrollHeight;
+    }
 </script>
 
 </body>
