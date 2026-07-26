@@ -180,9 +180,7 @@
 
 <script>
     const FAMILY_PASSWORD = "123"; 
-
-    // آدرس دقیق پل کلادفلر شما
-    const WORKER_URL = "https://snowy-sunset-fdf9.firooz-kianfar.workers.dev/";
+    const BASE_WORKER_URL = "https://snowy-sunset-fdf9.firooz-kianfar.workers.dev";
 
     window.onload = function() {
         const savedAuth = localStorage.getItem("is_authenticated");
@@ -234,7 +232,7 @@
         if (!messageText) return;
 
         const container = document.getElementById("messages-container");
-        const apiKey = localStorage.getItem("gemini_api_key");
+        const apiKey = localStorage.getItem("gemini_api_key") || "";
 
         const userDiv = document.createElement("div");
         userDiv.className = "message user-message";
@@ -250,12 +248,14 @@
         container.appendChild(aiDiv);
         container.scrollTop = container.scrollHeight;
 
+        // فرستادن کلید به صورت پارامتر در لینک برای جلوگیری از خطای هدر
+        const finalWorkerUrl = `${BASE_WORKER_URL}/?key=${encodeURIComponent(apiKey)}`;
+
         try {
-            const response = await fetch(WORKER_URL, {
+            const response = await fetch(finalWorkerUrl, {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json",
-                    "x-goog-api-key": apiKey
+                    "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
                     contents: [{
